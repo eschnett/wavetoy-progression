@@ -9,7 +9,7 @@ module WaveToy1 (Cell(..), initCell, errorCell, energyCell, rhsCell,
                  Grid(..), normGrid, initGrid, errorGrid, energyGrid, rhsGrid,
                  bcGrid, rk2Grid) where
 
-import Data.Array.IArray
+import qualified Data.Vector as V
 import Data.Monoid
 import Control.Applicative
 
@@ -51,7 +51,7 @@ flipCell (Cell u rho vx) = Cell (-u) (-rho) vx
 data Grid b a = Grid { iter :: Int,
                        time :: b,
                        bnds :: (b, b),
-                       cells :: Array Int a }
+                       cells :: V.Vector a }
   deriving (Read, Show)
 
 instance Foldable (Grid b) where
@@ -65,52 +65,52 @@ normGrid g = sqrt (s2 / c)
   where s2 = getSum $ foldMap (foldMap (Sum . (^2))) (cells g)
         c = getSum $ foldMap (foldMap (Sum . const 1)) (cells g)
 
-coordsList :: Fractional a => (a, a) -> Int -> [a]
-coordsList (xmin, xmax) np = [x i | i <- [0 .. np-1]]
+coordsVector :: Fractional a => (a, a) -> Int -> V.Vector a
+coordsVector (xmin, xmax) np = V.generate np x
   where x i = xmin + dx * (fromIntegral i + 1/2)
         dx = (xmax - xmin) / fromIntegral np
 
 initGrid :: Floating a => a -> (a, a) -> Int -> Grid a (Cell a)
-initGrid time bnds np = Grid 0 time bnds $ listArray (0, np - 1) $ cells
-  where cells = fmap (\x -> initCell (time, x)) $ coordsList bnds np
+initGrid time bnds np = Grid 0 time bnds $ V.map ini coords
+  where ini x = initCell (time, x)
+        coords = coordsVector bnds np
 
 errorGrid :: Floating a => Grid a (Cell a) -> Grid a (Cell a)
 errorGrid (Grid iter time bnds cells) =
-  Grid iter time bnds $ listArray (0, length cells - 1) $ errors
-  where errors = zipWith go (coordsList bnds (length cells)) (elems cells)
-        go x cell = errorCell (time, x) cell
+  Grid iter time bnds $ V.zipWith err coords cells
+  where err x cell = errorCell (time, x) cell
+        coords = coordsVector bnds np
+        np = V.length cells
 
 energyGrid :: Fractional a => Grid a (Cell a) -> a
 energyGrid (Grid _ _ (xmin, xmax) cells) =
   getSum (foldMap (Sum . energyCell) cells) * dx
   where dx = (xmax - xmin) / fromIntegral np
-        np = length cells
+        np = V.length cells
 
 rhsGrid :: Fractional a =>
            (Cell a, Cell a) -> Grid a (Cell a) -> Grid a (Cell a)
 rhsGrid (lb, ub) (Grid iter time (xmin, xmax) cells) =
-  Grid iter time (xmin, xmax) $ listArray (0, np-1) $ rhs
+  Grid iter time (xmin, xmax) $ V.fromList rhs
   where rhs = rmin ++ rint ++ rmax
-        rmin = [rhsCell dx (lb, cells ! 1) (cells ! 0)]
-        rint = [rhsCell dx (cells ! (i-1), cells ! (i+1)) (cells ! i) |
+        rmin = [rhsCell dx (lb, cells V.! 1) (cells V.! 0)]
+        rint = [rhsCell dx (cells V.! (i-1), cells V.! (i+1)) (cells V.! i) |
                 i <- [1 .. np-2]]
-        rmax = [rhsCell dx (cells ! (np-2), ub) (cells ! (np-1))]
+        rmax = [rhsCell dx (cells V.! (np-2), ub) (cells V.! (np-1))]
         dx = (xmax - xmin) / fromIntegral np
         np = length cells
 
 bcGrid :: Num a => Grid b (Cell a) -> (Cell a, Cell a)
 bcGrid g = (flipCell cmin, flipCell cmax)
-  where cmin = cells g ! 0
-        cmax = cells g ! (np-1)
+  where cmin = cells g V.! 0
+        cmax = cells g V.! (np-1)
         np = length (cells g)
 
 stepGrid :: (Fractional a, Applicative c) =>
             Grid a (c a) -> a -> Grid a (c a) -> Grid a (c a)
 stepGrid (Grid it t bnds state) dt (Grid _ _ _ rhs) =
-  Grid it (t + dt) bnds $ listArray (0, np-1) newelems
-  where newelems = zipWith (liftA2 step) (elems state) (elems rhs)
-        step s r = s + dt * r
-        np = length state
+  Grid it (t + dt) bnds $ V.zipWith (liftA2 step) state rhs
+  where step s r = s + dt * r
 
 rk2Grid :: (Fractional a, Applicative c) =>
            a -> (Grid a (c a) -> Grid a (c a)) -> Grid a (c a) -> Grid a (c a)

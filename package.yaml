@@ -37,8 +37,8 @@ ghc-options: -Wall
 github: eschnett/wavetoy-progression
 library:
   dependencies:
-  - array
   - base
+  - vector
   source-dirs: library
 license: MIT
 maintainer: Erik Schnetter
