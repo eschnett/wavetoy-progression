@@ -1,0 +1,60 @@
+# This YAML file describes your package. Stack will automatically generate a
+# Cabal file when you run `stack build`. See the hpack website for help with
+# this file: <https://github.com/sol/hpack>.
+benchmarks:
+  wavetoy-progression-benchmarks:
+    dependencies:
+    - base
+    - wavetoy-progression
+    - criterion
+    ghc-options:
+    - -rtsopts
+    - -threaded
+    - -with-rtsopts=-N
+    main: Main.hs
+    source-dirs: benchmark
+category: Other
+description: wavetoy-progression is a new Haskeleton package.
+executables:
+  wavetoy-progression:
+    dependencies:
+    - base
+    - monad-loops
+    - wavetoy-progression
+    ghc-options:
+    - -rtsopts
+    - -threaded
+    - -with-rtsopts=-N
+    main: Main.hs
+    source-dirs: executable
+extra-source-files:
+- CHANGELOG.md
+- LICENSE.md
+- package.yaml
+- README.md
+- stack.yaml
+ghc-options: -Wall
+github: eschnett/wavetoy-progression
+library:
+  dependencies:
+  - array
+  - base
+  source-dirs: library
+license: MIT
+maintainer: Erik Schnetter
+name: wavetoy-progression
+synopsis: A new Haskeleton package.
+tests:
+  wavetoy-progression-test-suite:
+    dependencies:
+    - base
+    - wavetoy-progression
+    - tasty
+    - tasty-hspec
+    ghc-options:
+    - -rtsopts
+    - -threaded
+    - -with-rtsopts=-N
+    main: Main.hs
+    source-dirs: test-suite
+version: '0.0.0'
