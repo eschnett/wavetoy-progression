@@ -1,6 +1,7 @@
 # [wavetoy-progression][]
 
 [![Build Status](https://travis-ci.org/eschnett/wavetoy-progression.svg?branch=master)](https://travis-ci.org/eschnett/wavetoy-progression)
+[![Coverage Status](https://coveralls.io/repos/github/eschnett/wavetoy-progression/badge.svg)](https://coveralls.io/github/eschnett/wavetoy-progression)
 
 Thanks for starting a project with Haskeleton! If you haven't heard of it
 before, I suggest reading the introductory blog post. You can find it here:
