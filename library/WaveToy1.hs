@@ -17,7 +17,7 @@ default (Int)
 
 
 
-data Cell a = Cell { u, rho, vx :: a }
+data Cell a = Cell { u, rho, vx :: !a }
   deriving (Eq, Ord, Read, Show, Foldable, Functor)
 
 instance Applicative Cell where
