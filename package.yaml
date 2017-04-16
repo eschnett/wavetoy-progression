@@ -28,10 +28,10 @@ executables:
     main: Main.hs
     source-dirs: executable
 extra-source-files:
-- CHANGELOG.md
-- LICENSE.md
+- CHANGELOG.rst
+- LICENSE.rst
 - package.yaml
-- README.md
+- README.rst
 - stack.yaml
 ghc-options: -Wall
 github: eschnett/wavetoy-progression
