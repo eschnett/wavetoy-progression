@@ -65,21 +65,18 @@ normGrid g = sqrt (s2 / c)
   where s2 = getSum $ foldMap (foldMap (Sum . (^2))) (cells g)
         c = getSum $ foldMap (foldMap (Sum . const 1)) (cells g)
 
-coordsVector :: Fractional a => (a, a) -> Int -> V.Vector a
-coordsVector (xmin, xmax) np = V.generate np x
-  where x i = xmin + dx * (fromIntegral i + 1/2)
-        dx = (xmax - xmin) / fromIntegral np
+coords :: Fractional a => (a, a) -> Int -> Int -> a
+coords (xmin, xmax) np = \i -> xmin + dx * (fromIntegral i + 1/2)
+  where dx = (xmax - xmin) / fromIntegral np
 
 initGrid :: Floating a => a -> (a, a) -> Int -> Grid a (Cell a)
-initGrid time bnds np = Grid 0 time bnds $ V.map ini coords
-  where ini x = initCell (time, x)
-        coords = coordsVector bnds np
+initGrid time bnds np = Grid 0 time bnds $ V.generate np ini
+  where ini i = initCell (time, coords bnds np i)
 
 errorGrid :: Floating a => Grid a (Cell a) -> Grid a (Cell a)
 errorGrid (Grid iter time bnds cells) =
-  Grid iter time bnds $ V.zipWith err coords cells
-  where err x cell = errorCell (time, x) cell
-        coords = coordsVector bnds np
+  Grid iter time bnds $ V.imap err cells
+  where err i cell = errorCell (time, coords bnds np i) cell
         np = V.length cells
 
 energyGrid :: Fractional a => Grid a (Cell a) -> a
