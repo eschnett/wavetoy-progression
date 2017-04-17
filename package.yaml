@@ -14,7 +14,7 @@ benchmarks:
     main: Main.hs
     source-dirs: benchmark
 category: Other
-description: wavetoy-progression is a new Haskeleton package.
+description: Designing a WaveToy in Haskell, in progressively more elegant steps
 executables:
   wavetoy-progression:
     dependencies:

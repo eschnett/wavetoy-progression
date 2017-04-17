@@ -1,5 +1,6 @@
 {-# LANGUAGE DeriveFoldable #-}
 {-# LANGUAGE DeriveFunctor #-}
+{-# OPTIONS_GHC -fno-warn-dodgy-imports #-}
 {-# OPTIONS_GHC -fno-warn-name-shadowing #-}
 {-# OPTIONS_GHC -fno-warn-type-defaults #-}
 {-# OPTIONS_GHC -fno-warn-unused-matches #-}
@@ -19,6 +20,8 @@ default (Int)
 
 
 
+-- |A cell holds the scalar wave equation state vector for a single
+-- grid point.
 data Cell a = Cell { u, rho, vx :: a }
   deriving (Eq, Ord, Read, Show, Foldable, Functor)
 
@@ -50,6 +53,7 @@ flipCell (Cell u rho vx) = Cell (-u) (-rho) vx
 
 
 
+-- |A grid holds the state vector for the whole simulation domain.
 data Grid b a = Grid { iter :: Int,
                        time :: b,
                        bnds :: (b, b),
