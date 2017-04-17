@@ -135,8 +135,8 @@ rk2Grid :: (Fractional a, VectorSpace (c a), a ~ Scalar (c a)) =>
            a -> (Grid a (c a) -> Grid a (c a)) -> Grid a (c a) -> Grid a (c a)
 rk2Grid dt rhs s0 =
   let r0 = rhs s0
-      s1 = s0 ^+^ ((dt/2) *^ r0)
+      s1 = s0 ^+^ (dt/2) *^ r0
       r1 = rhs s1
       s2 = s0 ^+^ dt *^ r1
-  in s2
+  in s2 { time = time s0 + dt }
 
