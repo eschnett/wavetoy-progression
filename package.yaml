@@ -39,6 +39,7 @@ library:
   dependencies:
   - base
   - vector
+  - vector-space
   source-dirs: library
 license: MIT
 maintainer: Erik Schnetter
