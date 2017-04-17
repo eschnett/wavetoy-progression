@@ -16,7 +16,7 @@ benchmarks:
 category: Other
 description: Designing a WaveToy in Haskell, in progressively more elegant steps
 executables:
-  wavetoy-progression:
+  wavetoy-progression-1:
     dependencies:
     - base
     - monad-loops
@@ -25,7 +25,19 @@ executables:
     - -rtsopts
     - -threaded
     - -with-rtsopts=-N
-    main: Main.hs
+    main: Main1.hs
+    source-dirs: executable
+  wavetoy-progression-2:
+    dependencies:
+    - base
+    - monad-loops
+    - vector-space
+    - wavetoy-progression
+    ghc-options:
+    - -rtsopts
+    - -threaded
+    - -with-rtsopts=-N
+    main: Main2.hs
     source-dirs: executable
 extra-source-files:
 - CHANGELOG.rst
