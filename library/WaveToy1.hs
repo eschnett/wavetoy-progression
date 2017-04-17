@@ -9,9 +9,11 @@ module WaveToy1 (Cell(..), initCell, errorCell, energyCell, rhsCell,
                  Grid(..), normGrid, initGrid, errorGrid, energyGrid, rhsGrid,
                  bcGrid, rk2Grid) where
 
-import qualified Data.Vector as V
-import Data.Monoid
 import Control.Applicative
+import Data.Monoid
+import Data.Vector ((!))
+import Prelude hiding ((!))
+import qualified Data.Vector as V
 
 default (Int)
 
@@ -89,31 +91,29 @@ rhsGrid :: Fractional a =>
            (Cell a, Cell a) -> Grid a (Cell a) -> Grid a (Cell a)
 rhsGrid (lb, ub) (Grid iter time (xmin, xmax) cells) =
   Grid iter time (xmin, xmax) $ V.fromList rhs
-  where rhs = rmin ++ rint ++ rmax
-        rmin = [rhsCell dx (lb, cells V.! 1) (cells V.! 0)]
-        rint = [rhsCell dx (cells V.! (i-1), cells V.! (i+1)) (cells V.! i) |
+  where rhs = rblo ++ rint ++ rbhi
+        rblo = [rhsCell dx (lb, cells ! 1) (cells ! 0)]
+        rint = [rhsCell dx (cells ! (i-1), cells ! (i+1)) (cells ! i) |
                 i <- [1 .. np-2]]
-        rmax = [rhsCell dx (cells V.! (np-2), ub) (cells V.! (np-1))]
+        rbhi = [rhsCell dx (cells ! (np-2), ub) (cells ! (np-1))]
         dx = (xmax - xmin) / fromIntegral np
         np = length cells
 
 bcGrid :: Num a => Grid b (Cell a) -> (Cell a, Cell a)
 bcGrid g = (flipCell cmin, flipCell cmax)
-  where cmin = cells g V.! 0
-        cmax = cells g V.! (np-1)
+  where cmin = cells g ! 0
+        cmax = cells g ! (np-1)
         np = length (cells g)
-
-stepGrid :: (Fractional a, Applicative c) =>
-            Grid a (c a) -> a -> Grid a (c a) -> Grid a (c a)
-stepGrid (Grid it t bnds state) dt (Grid _ _ _ rhs) =
-  Grid it (t + dt) bnds $ V.zipWith (liftA2 step) state rhs
-  where step s r = s + dt * r
 
 rk2Grid :: (Fractional a, Applicative c) =>
            a -> (Grid a (c a) -> Grid a (c a)) -> Grid a (c a) -> Grid a (c a)
 rk2Grid dt rhs s0 =
   let r0 = rhs s0
-      s1 = stepGrid s0 (dt/2) r0
+      s1 = step s0 (dt/2) r0
       r1 = rhs s1
-      s2 = stepGrid s0 dt r1
+      s2 = step s0 dt r1
   in s2
+  where step (Grid it t bnds state) dt (Grid _ _ _ rhs) =
+          Grid it (t + dt) bnds $ V.zipWith (liftA2 step') state rhs
+        step' s r = s + dt * r
+
